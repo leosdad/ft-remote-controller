@@ -2,7 +2,7 @@
 #pragma region -------------------------------------------------------- Includes
 
 #include <PS2X_lib.h>
-#include "MotorDriver.h"
+#include "PwmMotorDriver.h"
 #include <Servo.h>
 
 #pragma endregion
@@ -55,19 +55,20 @@ const uint8_t analog2 = A7;
 // PS/2 variables
 
 PS2X ps2x;
-byte ps2xResult = 0;
+uint8_t ps2xResult = 0;
 bool vibrate = false;
 
 // Servo variables
 
-int speed1 = 0;
+uint8_t reading1 = 0;
+uint8_t speed1 = 0;
 int angle1 = 90;
 int servoStep = 3;
 Servo servo1;
 
 // Motor variables
 
-MotorDriver motor1 = MotorDriver(motor1A, motor1B);
+PwmMotorDriver motor1;// = PwmMotorDriver();
 
 #pragma endregion
 
@@ -77,7 +78,11 @@ void setup()
 {
 	Serial.begin(BAUD_RATE);
 
-	// Servo
+	// Motors
+
+	motor1.Init(motor1A, motor1B);
+
+	// Servos
 
 	servo1.attach(servoPin1);
 	servo1.write(90);
@@ -121,12 +126,18 @@ void loop()
 
 	// Motor speed and direction control
 
-	speed1 = max(-255, min(255, (ps2x.Analog(PSS_LY) - 128) * 2));
+	reading1 = ps2x.Analog(PSS_LY);
 
-	if(speed1 > SPEED_DEAD_ZONE) {
+	if(reading1 > 128 + SPEED_DEAD_ZONE) {
+		speed1 = map(reading1, 255, 128, 100, 0);
+		Serial.print("CW ");
+		Serial.println(speed1);
 		motor1.RotateCW(speed1);
-	} else if(speed1 < -SPEED_DEAD_ZONE) {
-		motor1.RotateCCW(-speed1);
+	} else if(reading1 < 128 - SPEED_DEAD_ZONE) {
+		speed1 = map(reading1, 0, 128, 100, 0);
+		Serial.print("CCW ");
+		Serial.println(speed1);
+		motor1.RotateCCW(speed1);
 	} else {
 		motor1.Coast();
 	}
