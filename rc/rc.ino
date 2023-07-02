@@ -35,10 +35,10 @@ const uint8_t motor3B = 8;
 const uint8_t servoPin1 = 3;
 const uint8_t servoPin2 = 9;
 
-const uint8_t attention = 10;	// orange
-const uint8_t command = 11;		// green
-const uint8_t data = 12;		// blue
-const uint8_t clock = 13;		// gray
+const uint8_t attention = 10;	// CS (orange)
+const uint8_t command = 11;		// D0 (green)
+const uint8_t data = 12;		// D1 (blue)
+const uint8_t clock = 13;		// CLK (gray)
 
 const uint8_t motor4A = A0;
 const uint8_t motor4B = A1;
@@ -68,7 +68,8 @@ Servo servo1;
 
 // Motor variables
 
-PwmMotorDriver motor1;// = PwmMotorDriver();
+PwmMotorDriver motor1;
+
 
 #pragma endregion
 

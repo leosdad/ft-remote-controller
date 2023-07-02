@@ -6,10 +6,6 @@
 #include "PwmMotorDriver.h"
 #include <SoftPWM.h>
 
-// --------------------------------------------------------------------- Defines
-
-#define WITHIN100(v) max(0, min(100, v))
-
 // ------------------------------------------------------------- Private methods
 
 void PwmMotorDriver::initMotor(const uint8_t motorPorts[2])
@@ -47,38 +43,38 @@ void PwmMotorDriver::Init(const uint8_t motorPortA, const uint8_t motorPortB)
 
 void PwmMotorDriver::FullRotateCCW()
 {
-	SoftPWMSetPercent(motorOutB, 100);
-	SoftPWMSetPercent(motorOutA, 0);
+	SoftPWMSet(motorOutB, 255);
+	SoftPWMSet(motorOutA, 0);
 }
 
 void PwmMotorDriver::FullRotateCW()
 {
-	SoftPWMSetPercent(motorOutA, 100);
-	SoftPWMSetPercent(motorOutB, 0);
+	SoftPWMSet(motorOutA, 255);
+	SoftPWMSet(motorOutB, 0);
 }
 
 // Rotate with PWM
 
 void PwmMotorDriver::RotateCCW(const uint8_t speed)
 {
-	SoftPWMSetPercent(motorOutB, WITHIN100(speed));
-	SoftPWMSetPercent(motorOutA, 0);
+	SoftPWMSet(motorOutB, speed);
+	SoftPWMSet(motorOutA, 0);
 }
 
 void PwmMotorDriver::RotateCW(const uint8_t speed)
 {
-	SoftPWMSetPercent(motorOutA, WITHIN100(speed));
-	SoftPWMSetPercent(motorOutB, 0);
+	SoftPWMSet(motorOutA, speed);
+	SoftPWMSet(motorOutB, 0);
 }
 
 void PwmMotorDriver::Coast()
 {
-	SoftPWMSetPercent(motorOutA, 0);
-	SoftPWMSetPercent(motorOutB, 0);
+	SoftPWMSet(motorOutA, 0);
+	SoftPWMSet(motorOutB, 0);
 }
 
 void PwmMotorDriver::Brake()
 {
-	SoftPWMSetPercent(motorOutA, 100);
-	SoftPWMSetPercent(motorOutB, 100);
+	SoftPWMSet(motorOutA, 255);
+	SoftPWMSet(motorOutB, 255);
 }

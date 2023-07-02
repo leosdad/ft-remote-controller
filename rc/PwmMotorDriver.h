@@ -30,15 +30,23 @@ class PwmMotorDriver
 		void Init(const uint8_t motorPorts[2]);
 
 		/**
-		 * Rotate motor counterclockwise.
+		 * Rotate motor counterclockwise at full speed.
 		*/
 		void FullRotateCCW();
+
+		/**
+		 * Rotate motor counterclockwise. Speed must be between 0 and 255.
+		*/
 		void RotateCCW(const uint8_t speed);
 
 		/**
-		 * Rotate motor clockwise.
+		 * Rotate motor clockwise at full speed.
 		*/
 		void FullRotateCW();
+
+		/**
+		 * Rotate motor clockwise. Speed must be between 0 and 255.
+		*/
 		void RotateCW(const uint8_t speed);
 
 		/**
