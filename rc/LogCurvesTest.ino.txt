@@ -1,0 +1,23 @@
+
+#include <Arduino.h>
+#include "LogCurves.h"
+
+#define BAUD_RATE 57600
+
+void setup()
+{
+	Serial.begin(BAUD_RATE);
+	const int steps = 256;
+	const double smooth = 20;
+	uint8_t values[steps];
+
+	LogCurves lc;
+	lc.createLogCurve(values, steps, smooth, false, false);
+	// lc.showGraph(values, steps);
+	lc.outputValues(values, steps);
+}
+
+void loop()
+{
+
+}
