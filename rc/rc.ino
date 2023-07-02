@@ -46,7 +46,7 @@ const uint8_t motor4B = A1;
 const uint8_t servoPin1 = 3;
 const uint8_t servoPin2 = 9;
 
-// PS/2 receiver pins
+// PS2 receiver pins
 
 const uint8_t attention = 10;	// CS (orange)
 const uint8_t command = 11;		// D0 (green)
@@ -67,7 +67,7 @@ const uint8_t analog2 = A7;
 
 #pragma region ------------------------------------------------ Global variables
 
-// PS/2 variables
+// PS2 variables
 
 PS2X ps2x;
 uint8_t ps2xResult = 0;
@@ -117,18 +117,18 @@ void setup()
 	servo1.attach(servoPin1);
 	servo1.write(90);
 
-	// PS/2 controller
+	// PS2 controller
 
 	ps2xResult = ps2x.config_gamepad(clock, command, attention, data);
 
 	if(ps2xResult == 0) {
-		Serial.println("PS/2 receiver OK");
+		Serial.println("PS2 receiver OK");
 	} else if(ps2xResult == 1) {
-		Serial.println("No PS/2 receiver found.");
+		Serial.println("No PS2 receiver found.");
 	} else if(ps2xResult == 2) {
-		Serial.println("Found PS/2 receiver, commands not accepted.");
+		Serial.println("Found PS2 receiver, commands not accepted.");
 	} else if(ps2xResult == 3) {
-		Serial.println("Found PS/2 receiver, pressures mode not accepted.");
+		Serial.println("Found PS2 receiver, pressures mode not accepted.");
 	}
 
 	if(ps2x.readType() == 1) {
