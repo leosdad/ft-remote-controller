@@ -1,3 +1,4 @@
 /_sobras
 .vscode/c_cpp_properties.json
-rc.code-workspace
+*.code-workspace
+TODO.md

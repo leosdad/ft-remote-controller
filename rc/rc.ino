@@ -10,22 +10,27 @@
 #pragma region --------------------------------------------------------- Defines
 
 #define BAUD_RATE 57600
+
+// General constansts
+
 #define LOOP_DELAY 50
 
-// Servo constansts
+// Speed constansts
 
 #define SPEED_DEAD_ZONE 2
-#define ANGLE_DEAD_ZONE 2
-#define SERVO_MIN 55
-#define SERVO_MAX 125
 #define MAX_FORWARD_SPEED 255
 #define MAX_BACKWARDS_SPEED 128
 
+// Servo constansts
+
+#define SERVO_MIN 55
+#define SERVO_MAX 125
+
 #pragma endregion
 
-#pragma region ------------------------------------------------------- Constants
+#pragma region ---------------------------------------------------- Arduino pins
 
-// Arduino pins
+// Motors
 
 const uint8_t motor1A = 2;
 const uint8_t motor1B = 4;
@@ -33,41 +38,45 @@ const uint8_t motor2A = 5;
 const uint8_t motor2B = 6;
 const uint8_t motor3A = 7;
 const uint8_t motor3B = 8;
+const uint8_t motor4A = A0;
+const uint8_t motor4B = A1;
+
+// Servos
 
 const uint8_t servoPin1 = 3;
 const uint8_t servoPin2 = 9;
+
+// PS/2 receiver pins
 
 const uint8_t attention = 10;	// CS (orange)
 const uint8_t command = 11;		// D0 (green)
 const uint8_t data = 12;		// D1 (blue)
 const uint8_t clock = 13;		// CLK (gray)
 
-const uint8_t motor4A = A0;
-const uint8_t motor4B = A1;
+// DIP switches
+
 const uint8_t dip1_2 = A2;
 const uint8_t dip3_4 = A3;
+
+// Inputs
 
 const uint8_t analog1 = A6;
 const uint8_t analog2 = A7;
 
 #pragma endregion
 
-#pragma region ------------------------------------------------------- Variables
+#pragma region ------------------------------------------------ Global variables
 
 // PS/2 variables
 
 PS2X ps2x;
 uint8_t ps2xResult = 0;
-bool vibrate = false;
 
 // Servo variables
 
-int angle1 = 90;
-int servoStep = 3;
 Servo servo1;
-
-// Motor variables
-
+int steeringAngle = 90;
+uint8_t speed = 0;
 PwmMotorDriver motor1;
 
 // Sinusoidal lookup table
@@ -102,18 +111,15 @@ void setup()
 {
 	Serial.begin(BAUD_RATE);
 
-	// Motors
+	// Motors, servos
 
 	motor1.Init(motor1A, motor1B);
-
-	// Servos
-
 	servo1.attach(servoPin1);
 	servo1.write(90);
 
 	// PS/2 controller
 
-	ps2xResult = ps2x.config_gamepad(clock, command, attention, data, vibrate, vibrate);
+	ps2xResult = ps2x.config_gamepad(clock, command, attention, data);
 
 	if(ps2xResult == 0) {
 		Serial.println("PS/2 receiver OK");
@@ -142,7 +148,6 @@ void setup()
 void setMotorSpeed()
 {
 	byte reading = ps2x.Analog(PSS_LY);
-	uint8_t speed = 0;
 
 	if(reading < 128 - SPEED_DEAD_ZONE) {
 
@@ -151,8 +156,9 @@ void setMotorSpeed()
 
 		uint8_t pos = map(reading, 128, 0, 0, MAX_FORWARD_SPEED);
 		speed = lookupTable[pos];
-		Serial.print("CCW: "); Serial.print("pos "); Serial.print(pos);
-		Serial.print(", speed "); Serial.println(speed); motor1.RotateCCW(speed);
+		motor1.RotateCCW(speed);
+		// Serial.print("CCW: pos "); Serial.print(pos);
+		// Serial.print(", speed "); Serial.println(speed);
 		
 	} else if(reading > 128 + SPEED_DEAD_ZONE) {
 
@@ -161,38 +167,28 @@ void setMotorSpeed()
 
 		uint8_t pos = map(reading, 128, 255, 0, MAX_BACKWARDS_SPEED);
 		speed = lookupTable[pos];
-		Serial.print("CW: "); Serial.print("pos "); Serial.print(pos);
-		Serial.print(", speed "); Serial.println(speed);
 		motor1.RotateCW(speed);
+		// Serial.print("CW: pos "); Serial.print(pos);
+		// Serial.print(", speed "); Serial.println(speed);
 
 	} else {
 
-		// Analog button near central position: Motors are idle
+		// Analog button near central position: Motors se to idle
 
 		motor1.Coast();
 
 	}
-
-	// if(ps2x.Button(PSB_R1)) {
-	// 	// brake
-	// }
 }
 
 /**
- * Servo steering angle control.
+ * Servo steering steeringAngle control.
  */
 void setSteeringAngle()
 {
-	// steerAngle = map(ps2x.Analog(PSS_RX), 0, 255, SERVO_MIN, SERVO_MAX);
-	if(ps2x.Button(PSB_TRIANGLE)) {
-		angle1 = 90;
-	} else if(ps2x.Button(PSB_CIRCLE)) {
-		angle1 = min(SERVO_MAX, max(SERVO_MIN, angle1 + servoStep));
-	} else if(ps2x.Button(PSB_SQUARE)) {
-		angle1 = min(SERVO_MAX, max(SERVO_MIN, angle1 - servoStep));
-	}
-
-	servo1.write(angle1);
+	byte reading = ps2x.Analog(PSS_RX);
+	steeringAngle = map(reading, 0, 255, SERVO_MIN, SERVO_MAX);
+	servo1.write(steeringAngle);
+	// Serial.print("Angle: "); Serial.println(steeringAngle);
 }
 
 #pragma endregion
